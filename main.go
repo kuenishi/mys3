@@ -4,7 +4,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	//"runtime"
 	"time"
 	"log"
 	"os"
@@ -14,6 +13,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha1"
 	"io/ioutil"
+	"mys3/src"
 )
 
 func die(ch chan int) {
@@ -48,21 +48,8 @@ func usage() {
 
 
 func main() {
-/*
-	fmt.Printf("pa -> %d\n", (pa(add, 1))(2))
 
-	runtime.GOMAXPROCS(5)
-	var ch = make(chan int, 10)
-	var i int
-	i = 2
-	go hello(1,i,3, ch)
-	//go die(ch)
-	fmt.Printf("hello, world\n")
-	i = <-ch
-	fmt.Printf("recvd: %d\n", i)
-*/
-
-	c,_ := conf.ReadConfigFile("/Users/kuenishi/.s3cfg")
+	c,_ := conf.ReadConfigFile(os.Getenv("HOME") + "/.s3cfg")
 	host_base,_ := c.GetString("default", "host_base")
 	access_key,_ := c.GetString("default", "access_key")
 	secret_key,_ := c.GetString("default", "secret_key")
@@ -77,7 +64,7 @@ func main() {
 	subcmd := flag.Arg(0)
 	fmt.Printf("subcmd: %s\n", subcmd)
 
-	fmt.Printf("%v\n", flag.Args())
+	fmt.Printf("%v %d\n", flag.Args(), len(flag.Args()))
 	
 	switch subcmd {
 	case "info":
@@ -88,6 +75,7 @@ func main() {
 		req,_ := http.NewRequest("GET", url, nil)
 		resp,_ := client.Do(req)
 		fmt.Printf("%v\n -> %v", req, resp)
+
 	case "ls":
 		fmt.Println("ls")
 		client := &http.Client{}
@@ -104,9 +92,11 @@ func main() {
 		req.Header.Add("x-amz-date", date)
 		//req.Header.Add("Content-Length", "0")
 		resp,_ := client.Do(req)
+		//parser := xml.NewParser(resp.Body)
+		defer resp.Body.Close()
 		body,_ := ioutil.ReadAll(resp.Body)
-		fmt.Printf("%v\n -> %v '%v'", req, resp, string(body))
-
+		mys3.DoListAllMyBucketsResult(body)
+		//fmt.Printf("%v\n -> %v '%v'", req, resp, string(body))
 	}
 	//str := "GET\n\n\n\nx-amz-date:Sat, 27 Apr 2013 14:16:05 +0000\n/"
 	//fmt.Printf("%s\n%s => %v\n", secret_key, str, base64_hmac(secret_key, str))
