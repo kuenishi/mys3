@@ -47,6 +47,12 @@ func main() {
 			fmt.Printf("%v\n", string(body))
 		}
 		//fmt.Printf("%v\n -> %v '%v'", req, resp, string(body))
+
+	case "mp":
+		req := mys3.NewRequest(*a, "GET", flag.Arg(1), "/?uploads")
+		body := req.Send()
+		fmt.Printf("%v\n", string(body))
+
 	default:
 		flag.Usage()
 	}

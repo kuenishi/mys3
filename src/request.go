@@ -40,10 +40,11 @@ func NewRequest(a S3Account, verb, bucket, path string) *Request {
 	date := time.Now().Format(time.RFC822Z)
 	if bucket == "" {
 		url = fmt.Sprintf("http://%s%s", a.Host_base, path)
-		sign = Sign(a.secret_key, "GET", "", "", date, "", path)
+		sign = Sign(a.secret_key, verb, "", "", date, "", path)
 	}else {
 		url = fmt.Sprintf("http://%s.%s%s?delimiter=/", bucket, a.Host_base, path)
-		sign = Sign(a.secret_key, "GET", "", "", date, "", "/" + bucket + path)
+		//url = fmt.Sprintf("http://%s.%s%s", bucket, a.Host_base, path)
+		sign = Sign(a.secret_key, verb, "", "", date, "", "/" + bucket + path)
 	}
 	
 	r,_ := http.NewRequest(verb, url, nil)
