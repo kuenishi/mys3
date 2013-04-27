@@ -12,8 +12,11 @@ type Owner struct {
 type Bucket struct {
 //<Bucket><Name>resource.basho.co.jp</Name><CreationDate>2013-03-15T12:49:04.000Z</CreationDate></Bucket>
 	Name, CreationDate string
-	
 }
+func (b Bucket) pp() {
+	fmt.Printf("%s\t%s\n", b.CreationDate, b.Name)
+}
+
 type Buckets struct {
 	Bucket []Bucket
 }
@@ -27,6 +30,9 @@ type ListAllMyBucketsResult struct {
 func DoListAllMyBucketsResult(s []byte) {
 	lamb := ListAllMyBucketsResult{}
 	xml.Unmarshal(s, &lamb)
-	fmt.Printf("%v\n", lamb)
-	fmt.Printf("%v\n", lamb.Buckets.Bucket)
+	//fmt.Printf("%v\n", lamb)
+	for _,b := range lamb.Buckets.Bucket {
+		b.pp()
+	}
 }
+
