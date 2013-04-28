@@ -41,11 +41,15 @@ func NewRequest(a S3Account, verb, bucket, path string) *Request {
 	if bucket == "" {
 		url = fmt.Sprintf("http://%s%s", a.Host_base, path)
 		sign = Sign(a.secret_key, verb, "", "", date, "", path)
-	}else {
-		url = fmt.Sprintf("http://%s.%s%s?delimiter=/", bucket, a.Host_base, path)
-		//url = fmt.Sprintf("http://%s.%s%s", bucket, a.Host_base, path)
+	}else if path == "/"{
+		url = fmt.Sprintf("http://%s.%s/?delimiter=/", bucket, a.Host_base)
+		sign = Sign(a.secret_key, verb, "", "", date, "", "/" + bucket + path)
+	}else{
+		url = fmt.Sprintf("http://%s.%s%s", bucket, a.Host_base, path)
 		sign = Sign(a.secret_key, verb, "", "", date, "", "/" + bucket + path)
 	}
+	fmt.Println(url)
+
 	
 	r,_ := http.NewRequest(verb, url, nil)
 	c   := &http.Client{}
