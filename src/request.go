@@ -12,6 +12,11 @@ import (
 	"io"
 )
 
+func TestSign(a *S3Account, str string) {
+	s := base64_hmac(a.secret_key, str)
+	fmt.Println(s)
+}
+
 func base64_hmac(access_secret, str string) string {
 	h := hmac.New(sha1.New, []byte(access_secret))
 	h.Write([]byte(str))
@@ -40,7 +45,11 @@ func NewRequest(a S3Account, verb,
 	bucket, path string, body io.Reader) *Request {
 	var url,sign string
 
-	date := time.Now().Format(time.RFC822Z)
+	loc,_ := time.LoadLocation("GMT")
+	date := time.Now().In(loc).Format(time.RFC1123Z)
+	//date := time.Now().Format(time.RFC822Z)
+	// http://golang.org/pkg/time/#pkg-constants
+
 	if bucket == "" {
 		url = fmt.Sprintf("http://%s%s", a.Host_base, path)
 		sign = Sign(a.secret_key, verb, "", "", date, "", path)
@@ -51,19 +60,19 @@ func NewRequest(a S3Account, verb,
 		url = fmt.Sprintf("http://%s.%s%s", bucket, a.Host_base, path)
 		sign = Sign(a.secret_key, verb, "", "", date, "", "/" + bucket + path)
 	}
-	fmt.Println(url)
-
+	//fmt.Println(url)
+	//fmt.Println(sign)
 	
 	r,_ := http.NewRequest(verb, url, body)
 	c   := &http.Client{}
 	req := &Request{verb, url, bucket, *r, *c}
-	// http://golang.org/pkg/time/#pkg-constants
 
 	auth := fmt.Sprintf("AWS %s:%s", a.access_key, sign)
 	//fmt.Printf("%v\n", sign)
 	
 	req.req.Header.Add("Authorization", auth)
 	req.req.Header.Add("x-amz-date", date)
+	req.req.Header.Add("Date", date)
 	//req.Header.Add("Content-Length", "0")
 	return req
 }
