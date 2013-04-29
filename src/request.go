@@ -35,7 +35,9 @@ type Request struct {
  	req    http.Request
 	client http.Client
 }
-func NewRequest(a S3Account, verb, bucket, path string) *Request {
+
+func NewRequest(a S3Account, verb,
+	bucket, path string, body io.Reader) *Request {
 	var url,sign string
 
 	date := time.Now().Format(time.RFC822Z)
@@ -52,7 +54,7 @@ func NewRequest(a S3Account, verb, bucket, path string) *Request {
 	fmt.Println(url)
 
 	
-	r,_ := http.NewRequest(verb, url, nil)
+	r,_ := http.NewRequest(verb, url, body)
 	c   := &http.Client{}
 	req := &Request{verb, url, bucket, *r, *c}
 	// http://golang.org/pkg/time/#pkg-constants
@@ -84,14 +86,10 @@ func (r *Request) SendAndWriteFile(out io.Writer) int64 {
 		panic("can't fetch data")
 	}
 	//fmt.Printf("%v -> %v\n", e0, resp.Body)
-
 	n,e := io.Copy(out, resp.Body)
-
 	if e != nil { panic("can't copy to file") }
-
 	return n
 }
-
 
 func Sign(access_secret, verb, md5, ctype, date, hdrs, path string) string {
 	str := fmt.Sprintf("%s\n%s\n%s\n\nx-amz-date:%s%s\n%s", verb, md5, ctype, date, hdrs, path)

@@ -27,6 +27,7 @@ func main() {
 		mys3.GetObject(*a, flag.Arg(1), flag.Arg(2))
 
 	case "put":
+		mys3.PutObject(*a, flag.Arg(1), flag.Arg(2))
 
 	case "info":
 		if len(flag.Args()) < 2 {

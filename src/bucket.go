@@ -28,7 +28,7 @@ type ListAllMyBucketsResult struct {
 }
 
 func ListAllMyBuckets(a S3Account) {
-	req := NewRequest(a, "GET", "", "/")
+	req := NewRequest(a, "GET", "", "/", nil)
 	body := req.Send()
 
 	lamb := ListAllMyBucketsResult{}
@@ -70,7 +70,7 @@ type ListBucketResult struct {
 // todo; add listing subdirectories and Marker
 //    and recursive?
 func ListBucket(a S3Account, bucket string) {
-	req := NewRequest(a, "GET", bucket, "/")
+	req := NewRequest(a, "GET", bucket, "/", nil)
 	body := req.Send()
 	lbr := ListBucketResult{}
 	xml.Unmarshal(body, &lbr)
@@ -83,19 +83,19 @@ func ListBucket(a S3Account, bucket string) {
 }
 
 func ListMultipartUploads(a S3Account, bucket string) {
-	req := NewRequest(a, "GET", bucket, "/?uploads")
+	req := NewRequest(a, "GET", bucket, "/?uploads", nil)
 	body := req.Send()
 	fmt.Printf("%v\n", string(body))
 }
 
 func ShowPolicy(a S3Account, bucket string) {
-	req := NewRequest(a, "GET", bucket, "/?policy")
+	req := NewRequest(a, "GET", bucket, "/?policy", nil)
 	body := req.Send()
 	fmt.Printf("%v\n", string(body))
 }
 
 func ShowLocation(a S3Account, bucket string) {
-	req := NewRequest(a, "GET", bucket, "/?location")
+	req := NewRequest(a, "GET", bucket, "/?location", nil)
 	body := req.Send()
 	fmt.Printf("%v\n", string(body))
 
