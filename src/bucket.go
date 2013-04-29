@@ -39,10 +39,47 @@ func ListAllMyBuckets(a S3Account) {
 	}
 }
 
+// maybe CommonPrefixes and Contents can be
+// aggregated with same Interface function 'PP'
+// in the far future.
+type CommonPrefixes struct {
+	Prefix string
+}
+func (cp CommonPrefixes) pp () {
+	fmt.Printf("\t\t\t\tDIR\t%s\n", cp.Prefix)
+}
+type Contents struct {
+	Key, LastModified, ETag, StorageClass string
+	Size int
+	Owner Owner
+}
+func (c Contents) pp () {
+	fmt.Printf("%s\t%d\t%s\n",
+		c.LastModified, c.Size, c.Key)
+}
+type ListBucketResult struct {
+	XMLName xml.Name `xml:"ListBucketResult"`
+	Name, Prefix, Marker string
+	MaxKeys int
+	Delimiter string
+	IsTruncated bool
+	CommonPrefixes []CommonPrefixes
+	Contents []Contents
+}
+
+// todo; add listing subdirectories and Marker
+//    and recursive?
 func ListBucket(a S3Account, bucket string) {
 	req := NewRequest(a, "GET", bucket, "/")
 	body := req.Send()
-	fmt.Printf("%v\n", string(body))
+	lbr := ListBucketResult{}
+	xml.Unmarshal(body, &lbr)
+	for _,cp := range lbr.CommonPrefixes {
+		cp.pp()
+	}
+	for _,c := range lbr.Contents {
+		c.pp()
+	}
 }
 
 func ListMultipartUploads(a S3Account, bucket string) {
