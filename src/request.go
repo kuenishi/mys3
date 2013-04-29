@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 	"io/ioutil"
+	"io"
 )
 
 func base64_hmac(access_secret, str string) string {
@@ -72,6 +73,25 @@ func (r *Request) Send() []byte {
 	body,_ := ioutil.ReadAll(resp.Body)
 	return body
 }
+
+func (r *Request) SendAndWriteFile(out io.Writer) int64 {
+	req := &r.req
+	resp,e0 := r.client.Do(req)
+	defer resp.Body.Close()
+	
+	if e0 != nil {
+		fmt.Printf("%v\n", req)
+		panic("can't fetch data")
+	}
+	//fmt.Printf("%v -> %v\n", e0, resp.Body)
+
+	n,e := io.Copy(out, resp.Body)
+
+	if e != nil { panic("can't copy to file") }
+
+	return n
+}
+
 
 func Sign(access_secret, verb, md5, ctype, date, hdrs, path string) string {
 	str := fmt.Sprintf("%s\n%s\n%s\n\nx-amz-date:%s%s\n%s", verb, md5, ctype, date, hdrs, path)

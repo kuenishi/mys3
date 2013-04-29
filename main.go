@@ -23,6 +23,11 @@ func main() {
 	subcmd := flag.Arg(0)
 	
 	switch subcmd {
+	case "get":
+		mys3.GetObject(*a, flag.Arg(1), flag.Arg(2))
+
+	case "put":
+
 	case "info":
 		if len(flag.Args()) < 2 {
 			flag.Usage()
